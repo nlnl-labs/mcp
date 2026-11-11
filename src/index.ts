@@ -140,7 +140,7 @@ function createServer() {
   server.registerTool("get_pick", {
     title: "Pick for a job",
     description: "Use it when someone asks which model to use for a job. Returns the job page's latest published pick. The pick is always an outside model: NL;NL Labs' own models and systems (NL;NL Pull, NL;NL Desk) are never the pick. When one of ours would have been the pick under the same rule, the answer adds an \"ours\" entry with its figures, marked as ours, not as the pick. Returns the model the job page shows as its pick, with the page's label and rule, the figures as the page shows them (right answers per $1, cost per 1,000 right), the pick's own date and that model's day row." + FIELD_HELP,
-    inputSchema: { job: jobArg },
+    inputSchema: z.strictObject({ job: jobArg }),
     annotations: { ...ANN, title: "Pick for a job" },
   }, wrap(async ({ job }) => {
     const app = await loadApp();
@@ -168,7 +168,7 @@ function createServer() {
   server.registerTool("get_model_history", {
     title: "One model over time",
     description: "Use to follow one model on one job over time (for example, has it got cheaper or worse). Returns its published days: right answers, items, cost per 1,000 right in US dollars and IPD (right answers per dollar). On Extract, every row names its test; the answer says what the two tests are, and rows before and after 4 Nov come from different tests." + FIELD_HELP,
-    inputSchema: { job: jobArg, model: z.string().describe("Model or system name for that job, e.g. GPT-6 Luna, Claude Haiku 5.5, NL;NL Desk (a system. " + NOT_OPEN + ").") },
+    inputSchema: z.strictObject({ job: jobArg, model: z.string().max(100).describe("Model or system name for that job, e.g. GPT-6 Luna, Claude Haiku 5.5, NL;NL Desk (a system. " + NOT_OPEN + ").") }),
     annotations: { ...ANN, title: "One model over time" },
   }, wrap(async ({ job, model }) => {
     const app = await loadApp();
@@ -181,7 +181,7 @@ function createServer() {
   server.registerTool("get_day_results", {
     title: "All models on one day",
     description: "Use to compare the models and systems on one job on one day. Leave date out for the newest day. Returns every model's and system's published result that day, NL;NL Labs' own models and systems marked. Extract's documents days also carry invented, missed and unreadable counts." + FIELD_HELP,
-    inputSchema: { job: jobArg, date: z.string().optional().describe("YYYY-MM-DD. Default: newest day.") },
+    inputSchema: z.strictObject({ job: jobArg, date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("YYYY-MM-DD. Default: newest day.") }),
     annotations: { ...ANN, title: "All models on one day" },
   }, wrap(async ({ job, date }) => {
     const app = await loadApp();
@@ -230,6 +230,8 @@ const json = (status: number, message: string, headers: Record<string, string> =
 export default {
   async fetch(request, e, ctx) {
     if (request.method === "GET" && new URL(request.url).pathname === "/favicon.ico") return Response.redirect("https://nlnllabs.com/favicon.ico", 301);
+    // plain http gets a redirect to https (308 keeps the method). Cloudflare reports the visitor's scheme in cf-visitor; local dev sends none, so it stays on http.
+    if ((request.headers.get("cf-visitor") ?? "").includes('"scheme":"http"')) { const u = new URL(request.url); u.protocol = "https:"; return Response.redirect(u.toString(), 308); }
     // a limit per client address, inside the Worker (Cloudflare Workers rate-limiting binding; no dashboard step). Fails closed.
     const ip = request.headers.get("cf-connecting-ip") || "unknown";
     try {
