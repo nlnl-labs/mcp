@@ -22,7 +22,7 @@ type Job = {
   name: string; gloss: string; right: string; earlier: string; models: Model[]; pts: Record<string, Pt[]>;
   epochs: { from: string; to: string }[];
 };
-type Pick = { date: string; label: string; rule: string; note?: string; figure: string; cost: string; pick?: { id: string; name: string } };
+type Pick = { date: string; label: string; rule: string; note?: string; figure: string; cost: string; pick?: { id: string; name: string }; ours?: Record<string, unknown> };
 type App = { jobs: Record<string, Job>; picks?: Record<string, Pick>; ipd_note: string };
 type Test2 = { test: string; rows: { date: string; model: string; invented: unknown; missed: unknown; unreadable: unknown }[] };
 const JOBS = ["classify", "convert", "decide", "extract", "find", "fix", "match", "resolve", "write"] as const;
@@ -111,7 +111,7 @@ const INSTRUCTIONS = [
   "Free daily AI pricing for business jobs.",   // /exchange/ lead
   "No paid placement or referral fees.",   // /exchange/ page
   OURS_NOTE,
-  "Use these tools for any question about NL;NL Labs' daily model tests: the jobs, which model or system is the pick for a job, one model's history, or every model's result on one day. Call list_jobs first for job and model names. Quote data_date and cite when you answer.",   // this server's own usage text
+  "Use these tools for any question about NL;NL Labs' daily model tests: the jobs, which model is the pick for a job, one model's history, or every model's result on one day. Call list_jobs first for job and model names. Quote data_date and cite when you answer.",   // this server's own usage text
 ].join(" ");
 
 const ANN = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
@@ -139,7 +139,7 @@ function createServer() {
 
   server.registerTool("get_pick", {
     title: "Pick for a job",
-    description: "Returns the job page's latest published pick. It can be a model or a system. A pick marked \"Not open yet.\" cannot be used yet. Returns the model or system the job page shows as its pick (NL;NL Desk is a system, not a model. " + NOT_OPEN + "), with the page's label and rule, the figures as the page shows them (right answers per $1, cost per 1,000 right), the pick's own date and that model's day row." + FIELD_HELP,
+    description: "Use it when someone asks which model to use for a job. Returns the job page's latest published pick. The pick is always an outside model: NL;NL Labs' own models and systems (NL;NL Pull, NL;NL Desk) are never the pick. When one of ours would have been the pick under the same rule, the answer adds an \"ours\" entry with its figures, marked as ours, not as the pick. Returns the model the job page shows as its pick, with the page's label and rule, the figures as the page shows them (right answers per $1, cost per 1,000 right), the pick's own date and that model's day row." + FIELD_HELP,
     inputSchema: { job: jobArg },
     annotations: { ...ANN, title: "Pick for a job" },
   }, wrap(async ({ job }) => {
@@ -147,12 +147,13 @@ function createServer() {
     const { id, job: j } = pickJob(app, job);
     const k = app.picks?.[id];
     if (!k) throw new Error(`The site data has no pick entry for ${j.name} yet. Read the page: ${pageUrl(id)}`);
-    if (!k.pick) return reply(id, j, { pick: null, pick_date: k.date, label: k.label, message: k.note, rule_on_page: k.rule });
+    if (!k.pick) return reply(id, j, { pick: null, pick_date: k.date, label: k.label, message: k.note, rule_on_page: k.rule, ...(k.ours ? { ours: k.ours } : {}) });
     const pk = k.pick;
     const m = (j.models as Model[]).find((x) => x.id === pk.id);
     const p = (j.pts[pk.id] as Pt[] | undefined)?.find((x) => x[0] === k.date);
     return reply(id, j, {
       pick_date: k.date,
+      ...(k.ours ? { ours: k.ours } : {}),
       pick: {
         model: pk.name, date: k.date, label: k.label, rule_on_page: k.rule, shown_on_page: { figure: k.figure, cost: k.cost },
         ...(m?.ours || m?.sys ? { made_by_nlnl_labs: true, ...(m.sys ? { kind: "system" } : {}) } : {}),
