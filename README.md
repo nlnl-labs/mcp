@@ -8,7 +8,7 @@ Source for the read-only MCP server at `https://mcp.nlnllabs.com/mcp`. It reads 
 Tools:
 
 - `list_jobs`: the nine jobs, the models and systems tested on each, and the dates covered.
-- `get_pick`: the model or system a job's page currently picks, with its date and figures.
+- `get_pick`: the outside model a job's page currently picks, with its date and figures. NL;NL Labs' own models are never the pick.
 - `get_model_history`: one model's published results on one job, day by day.
 - `get_day_results`: every model's result on one job on one day.
 
