@@ -1,0 +1,17 @@
+{
+  "name": "nlnl-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [{ "pattern": "mcp.nlnllabs.com", "custom_domain": true }],
+  "preview_urls": false,
+  "vars": { "SITE": "https://nlnllabs.com" },
+  // once a day: scheduled() deletes tool_calls rows older than 12 months
+  "triggers": { "crons": ["17 3 * * *"] },
+  "observability": { "enabled": false },
+  // per client address: 100 requests per 60 seconds, per Cloudflare location. The namespace_id is an integer we choose; no dashboard step.
+  // one row per tool call (tool, job/model/date asked about, calling app's name, time). No IP, no question. Migration: migrations/0001_tool_calls.sql
+  "d1_databases": [{ "binding": "DB", "database_name": "nlnl-mcp-usage", "database_id": "4dbde09c-5a0d-4bd1-8ffd-c708eabe6349", "migrations_dir": "migrations" }],
+  "ratelimits": [{ "name": "RL", "namespace_id": "4101", "simple": { "limit": 100, "period": 60 } }]
+}

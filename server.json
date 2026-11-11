@@ -1,0 +1,15 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.nlnllabs/results",
+  "title": "NL;NL Labs",
+  "description": "Free daily AI pricing for business jobs, measured in right answers per dollar.",
+  "version": "1.1.2",
+  "websiteUrl": "https://nlnllabs.com/mcp/",
+  "repository": { "url": "https://github.com/nlnl-labs/mcp", "source": "github" },
+  "icons": [
+    { "src": "https://nlnllabs.com/assets/favicon.svg", "mimeType": "image/svg+xml", "sizes": ["any"] }
+  ],
+  "remotes": [
+    { "type": "streamable-http", "url": "https://mcp.nlnllabs.com/mcp" }
+  ]
+}
