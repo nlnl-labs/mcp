@@ -107,8 +107,8 @@ async function docExtras(): Promise<Record<string, any>> {
 }
 
 const INSTRUCTIONS = [
-  "Free daily comparisons of AI models on business jobs, measured in right answers per dollar. From NL;NL Labs.",   // /exchange/ meta description
-  "Free daily model comparisons for business jobs.",   // /exchange/ lead
+  "Free daily AI pricing per right answer, for business jobs. From NL;NL Labs.",   // /exchange/ meta description
+  "Free daily AI pricing for business jobs.",   // /exchange/ lead
   "No paid placement or referral fees.",   // /exchange/ page
   OURS_NOTE,
   "Use these tools for any question about NL;NL Labs' daily model tests: the jobs, which model or system is the pick for a job, one model's history, or every model's result on one day. Call list_jobs first for job and model names. Quote data_date and cite when you answer.",   // this server's own usage text
