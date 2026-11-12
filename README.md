@@ -1,6 +1,7 @@
 # NL;NL Labs MCP connector
 
 [![mcptry](https://mcptry.com/badge/com.nlnllabs/results)](https://mcptry.com/servers/com.nlnllabs/results)
+[![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/nlnl-labs/mcp)
 
 Source for the read-only MCP server at `https://mcp.nlnllabs.com/mcp`. It reads the daily AI test results published on
 [nlnllabs.com](https://nlnllabs.com) and returns them to Claude, ChatGPT or any MCP client. No account or sign-in.
